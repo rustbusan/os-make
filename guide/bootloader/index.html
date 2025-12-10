@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="OS Make Project" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>부트로더 - Rust OS 개발 가이드</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\ubd80\ud2b8\ub85c\ub354";
+        var mkdocs_page_input_path = "guide/bootloader.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/rust.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/toml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/makefile.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Rust OS 개발 가이드
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">홈</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">시작하기</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/overview/">개요</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/plan/">계획</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/setup/">초기 설정</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">개발 가이드</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../project-structure/">프로젝트 구조</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">부트로더</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">부팅 프로세스 개요</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">부트로더 선택</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-grub-multiboot">옵션 1: GRUB (Multiboot)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-bootloader">옵션 2: bootloader 크레이트</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3">옵션 3: 커스텀 부트로더</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#bootloader">bootloader 크레이트 사용</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1">1. 의존성 추가</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2">2. 부트 이미지 생성</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3_1">3. 빌드 및 실행</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#multiboot-grub">Multiboot 헤더 (GRUB 사용 시)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">부트 정보 구조체</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_5">링커 스크립트</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">커널 진입점</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_7">문제 해결</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">부팅 실패</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">디버깅</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_10">다음 단계</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../kernel-init/">커널 초기화</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Rust OS 개발 가이드</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">개발 가이드</li>
+      <li class="breadcrumb-item active">부트로더</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">부트로더</h1>
+<p>부트로더는 운영체제 커널을 메모리로 로드하고 실행하는 프로그램입니다.</p>
+<h2 id="_2">부팅 프로세스 개요</h2>
+<ol>
+<li><strong>BIOS/UEFI</strong>: 하드웨어 초기화 후 부트로더 실행</li>
+<li><strong>부트로더</strong>: 커널을 메모리로 로드</li>
+<li><strong>커널</strong>: 시스템 초기화 및 실행</li>
+</ol>
+<h2 id="_3">부트로더 선택</h2>
+<h3 id="1-grub-multiboot">옵션 1: GRUB (Multiboot)</h3>
+<p>GRUB는 널리 사용되는 부트로더입니다. Multiboot 표준을 따릅니다.</p>
+<p><strong>장점</strong>:
+- 널리 사용되고 검증됨
+- 다양한 파일 시스템 지원
+- 설정이 비교적 간단</p>
+<p><strong>단점</strong>:
+- 커널 크기 제한
+- Multiboot 헤더 필요</p>
+<h3 id="2-bootloader">옵션 2: bootloader 크레이트</h3>
+<p>Rust 생태계의 <code>bootloader</code> 크레이트를 사용할 수 있습니다.</p>
+<p><strong>장점</strong>:
+- Rust로 작성됨
+- 통합이 쉬움
+- 최신 기능 지원</p>
+<p><strong>단점</strong>:
+- 상대적으로 새로운 프로젝트</p>
+<h3 id="3">옵션 3: 커스텀 부트로더</h3>
+<p>직접 부트로더를 작성할 수 있습니다.</p>
+<p><strong>장점</strong>:
+- 완전한 제어
+- 학습 경험</p>
+<p><strong>단점</strong>:
+- 복잡하고 시간 소모적
+- 디버깅 어려움</p>
+<h2 id="bootloader">bootloader 크레이트 사용</h2>
+<h3 id="1">1. 의존성 추가</h3>
+<p><code>Cargo.toml</code>에 추가:</p>
+<pre class="highlight"><code class="language-toml">[dependencies]
+bootloader = "0.12"</code></pre>
+<h3 id="2">2. 부트 이미지 생성</h3>
+<p><code>bootimage</code> 도구를 사용하여 부팅 가능한 이미지를 생성합니다:</p>
+<pre class="highlight"><code class="language-bash">cargo install bootimage
+rustup component add llvm-tools-preview</code></pre>
+<h3 id="3_1">3. 빌드 및 실행</h3>
+<pre class="highlight"><code class="language-bash"># 빌드
+cargo bootimage
+
+# 실행
+qemu-system-x86_64 -drive format=raw,file=target/x86_64-unknown-none/debug/bootimage-os-make.bin</code></pre>
+<h2 id="multiboot-grub">Multiboot 헤더 (GRUB 사용 시)</h2>
+<p>Multiboot 표준을 따르려면 커널에 Multiboot 헤더를 추가해야 합니다:</p>
+<pre class="highlight"><code class="language-rust">#[repr(align(4))]
+#[repr(C)]
+struct MultibootHeader {
+    magic: u32,
+    flags: u32,
+    checksum: u32,
+}
+
+#[no_mangle]
+#[link_section = ".multiboot"]
+static MULTIBOOT_HEADER: MultibootHeader = MultibootHeader {
+    magic: 0x1BADB002,
+    flags: 0x00000003,
+    checksum: -(0x1BADB002 + 0x00000003),
+};</code></pre>
+<h2 id="_4">부트 정보 구조체</h2>
+<p>부트로더는 커널에 부팅 정보를 전달합니다:</p>
+<pre class="highlight"><code class="language-rust">#[repr(C)]
+pub struct BootInfo {
+    pub memory_map: MemoryMap,
+    pub bootloader_name: &amp;'static str,
+    // 기타 부팅 정보
+}</code></pre>
+<h2 id="_5">링커 스크립트</h2>
+<p>커널의 메모리 레이아웃을 정의하기 위해 링커 스크립트가 필요할 수 있습니다:</p>
+<pre class="highlight"><code class="language-ld">ENTRY(_start)
+
+SECTIONS
+{
+    . = 1M;
+
+    .boot :
+    {
+        *(.multiboot)
+    }
+
+    .text :
+    {
+        *(.text)
+    }
+
+    .rodata :
+    {
+        *(.rodata)
+    }
+
+    .data :
+    {
+        *(.data)
+    }
+
+    .bss :
+    {
+        *(.bss)
+    }
+}</code></pre>
+<h2 id="_6">커널 진입점</h2>
+<p>부트로더는 커널의 <code>_start</code> 함수를 호출합니다:</p>
+<pre class="highlight"><code class="language-rust">#[no_mangle]
+pub extern "C" fn _start(boot_info: &amp;'static BootInfo) -&gt; ! {
+    // 초기화 코드
+    init(boot_info);
+
+    // 메인 루프
+    loop {}
+}</code></pre>
+<h2 id="_7">문제 해결</h2>
+<h3 id="_8">부팅 실패</h3>
+<ul>
+<li>부트로더 설정 확인</li>
+<li>커널 바이너리 형식 확인 (ELF)</li>
+<li>메모리 레이아웃 확인</li>
+</ul>
+<h3 id="_9">디버깅</h3>
+<p>QEMU의 디버그 모드 사용:</p>
+<pre class="highlight"><code class="language-bash">qemu-system-x86_64 \
+    -kernel kernel.bin \
+    -s -S  # GDB 서버 모드</code></pre>
+<p>그리고 다른 터미널에서:</p>
+<pre class="highlight"><code class="language-bash">gdb kernel.bin
+(gdb) target remote :1234</code></pre>
+<h2 id="_10">다음 단계</h2>
+<ul>
+<li><a href="../kernel-init/">커널 초기화</a> - 커널 초기화 과정 및 하드웨어 설정</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../project-structure/" class="btn btn-neutral float-left" title="프로젝트 구조"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../kernel-init/" class="btn btn-neutral float-right" title="커널 초기화">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../project-structure/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../kernel-init/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

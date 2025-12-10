@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="OS Make Project" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>계획 - Rust OS 개발 가이드</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\uacc4\ud68d";
+        var mkdocs_page_input_path = "getting-started/plan.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/rust.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/toml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/makefile.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Rust OS 개발 가이드
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">홈</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">시작하기</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">개요</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">계획</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">프로젝트 목표</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">개발 단계</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#phase-1-foundation">Phase 1: 기반 구축 (Foundation)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#phase-2-memory-management">Phase 2: 메모리 관리 (Memory Management)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#phase-3-interrupt-handling">Phase 3: 인터럽트 처리 (Interrupt Handling)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#phase-4-process-management">Phase 4: 프로세스 관리 (Process Management)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#phase-5-file-system">Phase 5: 파일 시스템 (File System)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#phase-6-device-drivers">Phase 6: 장치 드라이버 (Device Drivers)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">기술 스택</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">필수 도구</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#rust">Rust 크레이트</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">프로젝트 구조</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_7">성공 기준</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_8">리스크 관리</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">주요 리스크</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">완화 전략</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_11">다음 단계</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../setup/">초기 설정</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">개발 가이드</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../guide/project-structure/">프로젝트 구조</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../guide/bootloader/">부트로더</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../guide/kernel-init/">커널 초기화</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Rust OS 개발 가이드</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">시작하기</li>
+      <li class="breadcrumb-item active">계획</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">프로젝트 계획</h1>
+<h2 id="_2">프로젝트 목표</h2>
+<p>Rust를 사용하여 기본적인 운영체제를 처음부터 개발합니다. 
+단계별로 기능을 추가하여 완전한 운영체제로 발전시킵니다.</p>
+<h2 id="_3">개발 단계</h2>
+<h3 id="phase-1-foundation">Phase 1: 기반 구축 (Foundation)</h3>
+<p><strong>목표</strong>: 부팅 가능한 최소한의 커널 구현</p>
+<ul>
+<li>[x] 개발 환경 설정</li>
+<li>[ ] 부트로더 설정 (GRUB 또는 직접 작성)</li>
+<li>[ ] 최소한의 커널 코드 작성</li>
+<li>[ ] 화면 출력 (VGA 텍스트 모드)</li>
+<li>[ ] "Hello World" 출력</li>
+</ul>
+<p><strong>예상 기간</strong>: 1-2주</p>
+<h3 id="phase-2-memory-management">Phase 2: 메모리 관리 (Memory Management)</h3>
+<p><strong>목표</strong>: 기본적인 메모리 관리 시스템 구현</p>
+<ul>
+<li>[ ] 페이지 테이블 설정</li>
+<li>[ ] 힙 할당자 구현</li>
+<li>[ ] 가상 메모리 매핑</li>
+<li>[ ] 메모리 보호 메커니즘</li>
+</ul>
+<p><strong>예상 기간</strong>: 2-3주</p>
+<h3 id="phase-3-interrupt-handling">Phase 3: 인터럽트 처리 (Interrupt Handling)</h3>
+<p><strong>목표</strong>: 하드웨어 인터럽트 처리 시스템 구축</p>
+<ul>
+<li>[ ] IDT (Interrupt Descriptor Table) 설정</li>
+<li>[ ] 키보드 인터럽트 처리</li>
+<li>[ ] 타이머 인터럽트 처리</li>
+<li>[ ] 예외 처리 (페이지 폴트, GPF 등)</li>
+</ul>
+<p><strong>예상 기간</strong>: 2-3주</p>
+<h3 id="phase-4-process-management">Phase 4: 프로세스 관리 (Process Management)</h3>
+<p><strong>목표</strong>: 멀티태스킹 지원</p>
+<ul>
+<li>[ ] 프로세스 구조체 정의</li>
+<li>[ ] 프로세스 스케줄러 구현</li>
+<li>[ ] 컨텍스트 스위칭</li>
+<li>[ ] 시스템 콜 인터페이스</li>
+</ul>
+<p><strong>예상 기간</strong>: 3-4주</p>
+<h3 id="phase-5-file-system">Phase 5: 파일 시스템 (File System)</h3>
+<p><strong>목표</strong>: 기본적인 파일 시스템 구현</p>
+<ul>
+<li>[ ] 파일 시스템 구조 설계</li>
+<li>[ ] 디렉토리 및 파일 관리</li>
+<li>[ ] 파일 읽기/쓰기 구현</li>
+<li>[ ] 가상 파일 시스템 (VFS) 인터페이스</li>
+</ul>
+<p><strong>예상 기간</strong>: 3-4주</p>
+<h3 id="phase-6-device-drivers">Phase 6: 장치 드라이버 (Device Drivers)</h3>
+<p><strong>목표</strong>: 주요 하드웨어 장치 지원</p>
+<ul>
+<li>[ ] 키보드 드라이버</li>
+<li>[ ] 마우스 드라이버</li>
+<li>[ ] 디스크 드라이버</li>
+<li>[ ] 네트워크 드라이버 (선택사항)</li>
+</ul>
+<p><strong>예상 기간</strong>: 4-6주</p>
+<h2 id="_4">기술 스택</h2>
+<h3 id="_5">필수 도구</h3>
+<ul>
+<li><strong>Rust</strong>: 최신 안정 버전 (1.70+)</li>
+<li><strong>QEMU</strong>: 가상 머신 에뮬레이터</li>
+<li><strong>GDB</strong>: 디버거</li>
+<li><strong>GRUB</strong>: 부트로더 (또는 직접 작성)</li>
+<li><strong>NASM</strong>: 어셈블러 (필요시)</li>
+</ul>
+<h3 id="rust">Rust 크레이트</h3>
+<ul>
+<li><code>bootloader</code>: 부트로더 통합</li>
+<li><code>x86_64</code>: x86_64 아키텍처 지원</li>
+<li><code>spin</code>: 스핀락 구현</li>
+<li><code>volatile</code>: 휘발성 메모리 접근</li>
+</ul>
+<h2 id="_6">프로젝트 구조</h2>
+<pre class="highlight"><code>os-make/
+├── Cargo.toml
+├── Cargo.lock
+├── bootloader/          # 부트로더 설정
+├── src/
+│   ├── main.rs         # 커널 진입점
+│   ├── memory/         # 메모리 관리
+│   ├── interrupts/     # 인터럽트 처리
+│   ├── process/        # 프로세스 관리
+│   ├── fs/             # 파일 시스템
+│   └── drivers/        # 장치 드라이버
+├── docs/               # 문서
+└── tests/              # 테스트 코드</code></pre>
+<h2 id="_7">성공 기준</h2>
+<p>각 단계가 완료되면 다음을 확인할 수 있어야 합니다:</p>
+<ol>
+<li><strong>Phase 1</strong>: QEMU에서 커널이 부팅되고 "Hello World" 출력</li>
+<li><strong>Phase 2</strong>: 동적 메모리 할당이 정상 작동</li>
+<li><strong>Phase 3</strong>: 키보드 입력이 처리되고 화면에 표시</li>
+<li><strong>Phase 4</strong>: 여러 프로세스가 동시에 실행됨</li>
+<li><strong>Phase 5</strong>: 파일을 읽고 쓸 수 있음</li>
+<li><strong>Phase 6</strong>: 주요 하드웨어 장치가 정상 작동</li>
+</ol>
+<h2 id="_8">리스크 관리</h2>
+<h3 id="_9">주요 리스크</h3>
+<ol>
+<li><strong>하드웨어 호환성</strong>: 다양한 하드웨어에서 테스트 필요</li>
+<li><strong>디버깅 어려움</strong>: 커널 디버깅은 복잡하고 시간 소모적</li>
+<li><strong>문서 부족</strong>: 일부 하드웨어 문서가 불완전할 수 있음</li>
+<li><strong>성능 최적화</strong>: 초기 구현은 최적화되지 않을 수 있음</li>
+</ol>
+<h3 id="_10">완화 전략</h3>
+<ul>
+<li>단계별 개발 및 테스트</li>
+<li>QEMU를 통한 가상 환경에서 먼저 개발</li>
+<li>커뮤니티 및 참고 자료 활용</li>
+<li>코드 리뷰 및 문서화</li>
+</ul>
+<h2 id="_11">다음 단계</h2>
+<ul>
+<li><a href="../setup/">초기 설정</a> - 개발 환경 구축 및 프로젝트 초기화</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../overview/" class="btn btn-neutral float-left" title="개요"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../setup/" class="btn btn-neutral float-right" title="초기 설정">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../setup/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

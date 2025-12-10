@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="OS Make Project" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>커널 초기화 - Rust OS 개발 가이드</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\ucee4\ub110 \ucd08\uae30\ud654";
+        var mkdocs_page_input_path = "guide/kernel-init.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/rust.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/toml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/makefile.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Rust OS 개발 가이드
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">홈</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">시작하기</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/overview/">개요</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/plan/">계획</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/setup/">초기 설정</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">개발 가이드</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../project-structure/">프로젝트 구조</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bootloader/">부트로더</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">커널 초기화</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">초기화 순서</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">기본 초기화 코드</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">메모리 초기화</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">페이지 테이블 설정</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_6">힙 초기화</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_7">인터럽트 초기화</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#idt">IDT 설정</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">예외 핸들러</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_9">장치 초기화</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">타이머 초기화</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">키보드 초기화</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#vga">VGA 텍스트 모드 초기화</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_12">초기화 완료 후</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_13">초기화 체크리스트</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_14">디버깅 팁</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_15">초기화 단계별 출력</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#qemu">QEMU 모니터 사용</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_16">다음 단계</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Rust OS 개발 가이드</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">개발 가이드</li>
+      <li class="breadcrumb-item active">커널 초기화</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">커널 초기화</h1>
+<p>커널이 부팅된 후 시스템을 초기화하는 과정을 설명합니다.</p>
+<h2 id="_2">초기화 순서</h2>
+<p>커널 초기화는 다음 순서로 진행됩니다:</p>
+<ol>
+<li><strong>기본 설정</strong>: 스택 포인터, 세그먼트 레지스터 설정</li>
+<li><strong>메모리 관리</strong>: 페이지 테이블 설정, 힙 초기화</li>
+<li><strong>인터럽트</strong>: IDT 설정, 인터럽트 활성화</li>
+<li><strong>장치 초기화</strong>: 타이머, 키보드 등 하드웨어 초기화</li>
+<li><strong>사용자 인터페이스</strong>: 쉘 또는 GUI 초기화</li>
+</ol>
+<h2 id="_3">기본 초기화 코드</h2>
+<pre class="highlight"><code class="language-rust">#[no_mangle]
+pub extern "C" fn _start(boot_info: &amp;'static BootInfo) -&gt; ! {
+    // 1. 초기 스택 설정 (이미 부트로더가 설정했을 수 있음)
+
+    // 2. 초기화 함수 호출
+    init(boot_info);
+
+    // 3. 메인 루프
+    main_loop();
+}
+
+fn init(boot_info: &amp;'static BootInfo) {
+    // 메모리 관리자 초기화
+    memory::init(boot_info);
+
+    // 인터럽트 초기화
+    interrupts::init();
+
+    // 장치 드라이버 초기화
+    drivers::init();
+
+    // 파일 시스템 초기화
+    fs::init();
+
+    println!("커널 초기화 완료!");
+}</code></pre>
+<h2 id="_4">메모리 초기화</h2>
+<h3 id="_5">페이지 테이블 설정</h3>
+<pre class="highlight"><code class="language-rust">use x86_64::structures::paging::PageTable;
+
+pub fn init_memory(boot_info: &amp;BootInfo) {
+    // 부트로더가 제공한 메모리 맵 사용
+    let memory_map = &amp;boot_info.memory_map;
+
+    // 페이지 테이블 생성
+    let mut mapper = unsafe { create_page_table() };
+
+    // 힙 영역 매핑
+    map_heap(&amp;mut mapper);
+
+    // 힙 할당자 초기화
+    init_heap();
+}</code></pre>
+<h3 id="_6">힙 초기화</h3>
+<pre class="highlight"><code class="language-rust">use linked_list_allocator::LockedHeap;
+
+#[global_allocator]
+static ALLOCATOR: LockedHeap = LockedHeap::empty();
+
+pub fn init_heap() {
+    const HEAP_START: usize = 0x_4444_4444_0000;
+    const HEAP_SIZE: usize = 100 * 1024; // 100 KB
+
+    unsafe {
+        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
+    }
+}</code></pre>
+<h2 id="_7">인터럽트 초기화</h2>
+<h3 id="idt">IDT 설정</h3>
+<pre class="highlight"><code class="language-rust">use x86_64::structures::idt::InterruptDescriptorTable;
+
+static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
+
+pub fn init_idt() {
+    unsafe {
+        IDT.breakpoint.set_handler_fn(breakpoint_handler);
+        IDT.double_fault.set_handler_fn(double_fault_handler);
+        IDT.page_fault.set_handler_fn(page_fault_handler);
+        IDT[0x20].set_handler_fn(timer_interrupt_handler);
+        IDT[0x21].set_handler_fn(keyboard_interrupt_handler);
+
+        IDT.load();
+    }
+}
+
+pub fn enable_interrupts() {
+    x86_64::instructions::interrupts::enable();
+}</code></pre>
+<h3 id="_8">예외 핸들러</h3>
+<pre class="highlight"><code class="language-rust">extern "x86-interrupt" fn breakpoint_handler(
+    stack_frame: InterruptStackFrame
+) {
+    println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn double_fault_handler(
+    stack_frame: InterruptStackFrame,
+    _error_code: u64,
+) -&gt; ! {
+    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn page_fault_handler(
+    stack_frame: InterruptStackFrame,
+    error_code: PageFaultErrorCode,
+) {
+    use x86_64::registers::control::Cr2;
+
+    println!("EXCEPTION: PAGE FAULT");
+    println!("Accessed Address: {:?}", Cr2::read());
+    println!("Error Code: {:?}", error_code);
+    println!("{:#?}", stack_frame);
+    panic!("Page fault occurred");
+}</code></pre>
+<h2 id="_9">장치 초기화</h2>
+<h3 id="_10">타이머 초기화</h3>
+<pre class="highlight"><code class="language-rust">pub fn init_timer() {
+    // PIT (Programmable Interval Timer) 설정
+    // 1ms마다 인터럽트 발생하도록 설정
+    const TIMER_FREQUENCY: u32 = 1000; // Hz
+
+    unsafe {
+        let divisor = 1193180 / TIMER_FREQUENCY;
+        let bytes = divisor.to_le_bytes();
+
+        // PIT 제어 레지스터에 쓰기
+        x86_64::instructions::port::Port::new(0x43).write(0x36u8);
+        x86_64::instructions::port::Port::new(0x40).write(bytes[0]);
+        x86_64::instructions::port::Port::new(0x40).write(bytes[1]);
+    }
+}</code></pre>
+<h3 id="_11">키보드 초기화</h3>
+<pre class="highlight"><code class="language-rust">pub fn init_keyboard() {
+    // PS/2 키보드 컨트롤러 초기화
+    unsafe {
+        // 키보드 활성화
+        x86_64::instructions::port::Port::new(0x64).write(0xAEu8);
+    }
+}</code></pre>
+<h3 id="vga">VGA 텍스트 모드 초기화</h3>
+<pre class="highlight"><code class="language-rust">pub fn init_vga() {
+    // VGA 텍스트 모드 버퍼는 0xB8000에 위치
+    // 80x25 문자, 각 문자는 2바이트 (문자 + 속성)
+    let vga_buffer = 0xB8000 as *mut u8;
+
+    // 화면 클리어
+    for i in 0..(80 * 25 * 2) {
+        unsafe {
+            *vga_buffer.add(i) = 0;
+        }
+    }
+}</code></pre>
+<h2 id="_12">초기화 완료 후</h2>
+<p>초기화가 완료되면 메인 루프로 진입합니다:</p>
+<pre class="highlight"><code class="language-rust">fn main_loop() -&gt; ! {
+    println!("커널이 정상적으로 실행 중입니다.");
+    println!("명령을 입력하세요:");
+
+    loop {
+        // 키보드 입력 대기
+        if let Some(key) = keyboard::read_key() {
+            handle_key(key);
+        }
+
+        // 스케줄러 실행 (프로세스 관리 구현 후)
+        // scheduler::run();
+
+        // CPU 절전 모드
+        x86_64::instructions::hlt();
+    }
+}</code></pre>
+<h2 id="_13">초기화 체크리스트</h2>
+<p>초기화 과정에서 다음을 확인해야 합니다:</p>
+<ul>
+<li>[ ] 스택이 올바르게 설정되었는가?</li>
+<li>[ ] 페이지 테이블이 올바르게 설정되었는가?</li>
+<li>[ ] 힙 할당자가 작동하는가?</li>
+<li>[ ] 인터럽트가 활성화되었는가?</li>
+<li>[ ] 예외 핸들러가 등록되었는가?</li>
+<li>[ ] 타이머 인터럽트가 발생하는가?</li>
+<li>[ ] 키보드 입력이 처리되는가?</li>
+<li>[ ] 화면 출력이 정상인가?</li>
+</ul>
+<h2 id="_14">디버깅 팁</h2>
+<h3 id="_15">초기화 단계별 출력</h3>
+<p>각 초기화 단계마다 출력을 추가하여 어느 단계에서 문제가 발생하는지 확인:</p>
+<pre class="highlight"><code class="language-rust">fn init(boot_info: &amp;'static BootInfo) {
+    println!("[1/5] 메모리 초기화 중...");
+    memory::init(boot_info);
+    println!("[1/5] 완료");
+
+    println!("[2/5] 인터럽트 초기화 중...");
+    interrupts::init();
+    println!("[2/5] 완료");
+
+    // ...
+}</code></pre>
+<h3 id="qemu">QEMU 모니터 사용</h3>
+<p>QEMU의 모니터를 통해 시스템 상태 확인:</p>
+<pre class="highlight"><code class="language-bash">qemu-system-x86_64 -kernel kernel.bin -monitor stdio</code></pre>
+<p>모니터에서 사용 가능한 명령어:
+- <code>info registers</code>: CPU 레지스터 상태
+- <code>info mem</code>: 메모리 매핑 정보
+- <code>info irq</code>: 인터럽트 상태</p>
+<h2 id="_16">다음 단계</h2>
+<p>초기화가 완료되면 다음 기능을 구현할 수 있습니다:</p>
+<ul>
+<li>프로세스 관리 및 멀티태스킹</li>
+<li>파일 시스템 구현</li>
+<li>추가 장치 드라이버 개발</li>
+<li>사용자 인터페이스 구현</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../bootloader/" class="btn btn-neutral float-left" title="부트로더"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../bootloader/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

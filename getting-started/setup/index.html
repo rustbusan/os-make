@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="OS Make Project" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>초기 설정 - Rust OS 개발 가이드</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\ucd08\uae30 \uc124\uc815";
+        var mkdocs_page_input_path = "getting-started/setup.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/rust.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/toml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/makefile.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Rust OS 개발 가이드
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">홈</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">시작하기</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">개요</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../plan/">계획</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">초기 설정</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">필수 요구사항</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-rust">1. Rust 설치</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-rust">2. Rust 타겟 설치</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3-qemu">3. QEMU 설치</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#windows">Windows</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#linux-ubuntudebian">Linux (Ubuntu/Debian)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#macos">macOS</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4">4. 부트로더 설정</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#5">5. 디버거 (선택사항)</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#windows_1">Windows</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#linux">Linux</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#macos_1">macOS</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">프로젝트 초기화</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1">1. 새 프로젝트 생성</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-cargotoml">2. Cargo.toml 설정</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#3">3. 커스텀 타겟 설정</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#4_1">4. 기본 커널 코드 작성</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">빌드 및 실행</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">빌드</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#qemu">QEMU에서 실행</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#makefile">Makefile 설정 (선택사항)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">문제 해결</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">일반적인 문제</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">유용한 명령어</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_9">다음 단계</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">개발 가이드</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../guide/project-structure/">프로젝트 구조</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../guide/bootloader/">부트로더</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../guide/kernel-init/">커널 초기화</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Rust OS 개발 가이드</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">시작하기</li>
+      <li class="breadcrumb-item active">초기 설정</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">초기 설정</h1>
+<h2 id="_2">필수 요구사항</h2>
+<p>운영체제 개발을 시작하기 전에 다음 도구들이 설치되어 있어야 합니다.</p>
+<h3 id="1-rust">1. Rust 설치</h3>
+<p>Rust는 공식 설치 스크립트를 사용하여 설치할 수 있습니다:</p>
+<pre class="highlight"><code class="language-bash"># Windows (PowerShell)
+Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe
+.\rustup-init.exe
+
+# Linux/macOS
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre>
+<p>설치 후 다음 명령어로 확인:</p>
+<pre class="highlight"><code class="language-bash">rustc --version
+cargo --version</code></pre>
+<h3 id="2-rust">2. Rust 타겟 설치</h3>
+<p>운영체제 개발을 위해 <code>no_std</code> 환경을 위한 타겟을 설치해야 합니다:</p>
+<pre class="highlight"><code class="language-bash"># x86_64 타겟 (일반적인 PC)
+rustup target add x86_64-unknown-none
+
+# 또는 커스텀 타겟 사용</code></pre>
+<h3 id="3-qemu">3. QEMU 설치</h3>
+<p>QEMU는 가상 머신을 에뮬레이션하는 도구입니다.</p>
+<h4 id="windows">Windows</h4>
+<pre class="highlight"><code class="language-powershell"># Chocolatey 사용
+choco install qemu
+
+# 또는 직접 다운로드
+# https://www.qemu.org/download/#windows</code></pre>
+<h4 id="linux-ubuntudebian">Linux (Ubuntu/Debian)</h4>
+<pre class="highlight"><code class="language-bash">sudo apt-get update
+sudo apt-get install qemu-system-x86</code></pre>
+<h4 id="macos">macOS</h4>
+<pre class="highlight"><code class="language-bash">brew install qemu</code></pre>
+<h3 id="4">4. 부트로더 설정</h3>
+<p>GRUB 또는 커스텀 부트로더를 사용할 수 있습니다. 
+Rust 생태계에서는 <code>bootloader</code> 크레이트를 사용하는 것이 일반적입니다.</p>
+<h3 id="5">5. 디버거 (선택사항)</h3>
+<p>GDB를 사용하여 커널을 디버깅할 수 있습니다:</p>
+<h4 id="windows_1">Windows</h4>
+<pre class="highlight"><code class="language-powershell"># Chocolatey 사용
+choco install mingw
+
+# 또는 WSL 사용</code></pre>
+<h4 id="linux">Linux</h4>
+<pre class="highlight"><code class="language-bash">sudo apt-get install gdb</code></pre>
+<h4 id="macos_1">macOS</h4>
+<pre class="highlight"><code class="language-bash">brew install gdb</code></pre>
+<h2 id="_3">프로젝트 초기화</h2>
+<h3 id="1">1. 새 프로젝트 생성</h3>
+<pre class="highlight"><code class="language-bash">cargo new --name os-make os-make
+cd os-make</code></pre>
+<h3 id="2-cargotoml">2. Cargo.toml 설정</h3>
+<p><code>Cargo.toml</code> 파일을 다음과 같이 설정합니다:</p>
+<pre class="highlight"><code class="language-toml">[package]
+name = "os-make"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 운영체제 개발에 필요한 크레이트들
+bootloader = "0.12"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"</code></pre>
+<h3 id="3">3. 커스텀 타겟 설정</h3>
+<p><code>x86_64-unknown-none.json</code> 파일을 생성합니다:</p>
+<pre class="highlight"><code class="language-json">{
+  "llvm-target": "x86_64-unknown-none",
+  "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128",
+  "arch": "x86_64",
+  "target-endian": "little",
+  "target-pointer-width": "64",
+  "target-c-int-width": "32",
+  "os": "none",
+  "executables": true,
+  "linker-flavor": "ld.lld",
+  "linker": "rust-lld",
+  "panic-strategy": "abort",
+  "disable-redzone": true,
+  "features": "-mmx,-sse,+soft-float"
+}</code></pre>
+<h3 id="4_1">4. 기본 커널 코드 작성</h3>
+<p><code>src/main.rs</code> 파일을 다음과 같이 작성합니다:</p>
+<pre class="highlight"><code class="language-rust">#![no_std]
+#![no_main]
+
+use core::panic::PanicInfo;
+
+#[no_mangle]
+pub extern "C" fn _start() -&gt; ! {
+    loop {}
+}
+
+#[panic_handler]
+fn panic(_info: &amp;PanicInfo) -&gt; ! {
+    loop {}
+}</code></pre>
+<h2 id="_4">빌드 및 실행</h2>
+<h3 id="_5">빌드</h3>
+<pre class="highlight"><code class="language-bash">cargo build --target x86_64-unknown-none.json</code></pre>
+<h3 id="qemu">QEMU에서 실행</h3>
+<pre class="highlight"><code class="language-bash">qemu-system-x86_64 \
+    -drive format=raw,file=target/x86_64-unknown-none/debug/os-make \
+    -serial stdio</code></pre>
+<p>또는 더 간단하게:</p>
+<pre class="highlight"><code class="language-bash">qemu-system-x86_64 -kernel target/x86_64-unknown-none/debug/os-make</code></pre>
+<h2 id="makefile">Makefile 설정 (선택사항)</h2>
+<p>빌드 및 실행을 자동화하기 위해 <code>Makefile</code>을 생성할 수 있습니다:</p>
+<pre class="highlight"><code class="language-makefile">.PHONY: build run clean
+
+TARGET = x86_64-unknown-none
+KERNEL = target/$(TARGET)/debug/os-make
+
+build:
+    cargo build --target $(TARGET).json
+
+run: build
+    qemu-system-x86_64 -kernel $(KERNEL)
+
+clean:
+    cargo clean</code></pre>
+<h2 id="_6">문제 해결</h2>
+<h3 id="_7">일반적인 문제</h3>
+<ol>
+<li><strong>링커 오류</strong>: <code>rust-lld</code>가 설치되어 있는지 확인</li>
+<li><strong>QEMU 실행 오류</strong>: 바이너리 형식 확인 (ELF 형식 필요)</li>
+<li><strong>부팅 실패</strong>: 부트로더 설정 확인</li>
+</ol>
+<h3 id="_8">유용한 명령어</h3>
+<pre class="highlight"><code class="language-bash"># 타겟 확인
+rustup target list
+
+# 크레이트 문서 확인
+cargo doc --open
+
+# 릴리즈 빌드
+cargo build --release --target x86_64-unknown-none.json</code></pre>
+<h2 id="_9">다음 단계</h2>
+<ul>
+<li><a href="../../guide/project-structure/">프로젝트 구조</a> - 프로젝트 구조 설계</li>
+<li><a href="../../guide/bootloader/">부트로더</a> - 부트로더 설정 및 구현</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../plan/" class="btn btn-neutral float-left" title="계획"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../guide/project-structure/" class="btn btn-neutral float-right" title="프로젝트 구조">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../plan/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../guide/project-structure/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

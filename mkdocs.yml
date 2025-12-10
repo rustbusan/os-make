@@ -1,0 +1,33 @@
+site_name: Rust OS 개발 가이드
+site_description: Rust를 활용한 운영체제 작성 가이드
+site_author: OS Make Project
+
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+    - rust
+    - toml
+    - bash
+    - makefile
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - tables
+
+nav:
+  - 홈: index.md
+  - 시작하기:
+    - 개요: getting-started/overview.md
+    - 계획: getting-started/plan.md
+    - 초기 설정: getting-started/setup.md
+  - 개발 가이드:
+    - 프로젝트 구조: guide/project-structure.md
+    - 부트로더: guide/bootloader.md
+    - 커널 초기화: guide/kernel-init.md

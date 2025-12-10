@@ -230,6 +230,6 @@ cargo build --release --target x86_64-unknown-none.json
 
 ## 다음 단계
 
-- [프로젝트 구조](guide/project-structure.md) - 프로젝트 구조 설계
-- [부트로더](guide/bootloader.md) - 부트로더 설정 및 구현
+- [프로젝트 구조](../guide/project-structure.md) - 프로젝트 구조 설계
+- [부트로더](../guide/bootloader.md) - 부트로더 설정 및 구현
 
